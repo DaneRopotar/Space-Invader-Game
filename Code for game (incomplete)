@@ -1,0 +1,379 @@
+int TimeRemaining = 50;
+int Intro = 0;
+
+
+
+int [][] InvaderXPosition = {{150, 175, 200, 225, 250, 275, 300, 325, 350, 375}, 
+  {150, 175, 200, 225, 250, 275, 300, 325, 350, 375}, 
+  {150, 175, 200, 225, 250, 275, 300, 325, 350, 375}, 
+  {150, 175, 200, 225, 250, 275, 300, 325, 350, 375}, 
+  {150, 175, 200, 225, 250, 275, 300, 325, 350, 375}};
+
+int [][] AlienYs = {{160, 160, 160, 160, 160, 160, 160, 160, 160, 160}, 
+  {180, 180, 180, 180, 180, 180, 180, 180, 180, 180}, 
+  {200, 200, 200, 200, 200, 200, 200, 200, 200, 200}, 
+  {220, 220, 220, 220, 220, 220, 220, 220, 220, 220}, 
+  {240, 240, 240, 240, 240, 240, 240, 240, 240, 240}};
+
+int TankX = 300;
+int TankY = 450;
+int Shipx = 1;
+int LaserX = 321;
+int LaserY = 440;
+int score =  0;
+int gameState = 1;
+
+boolean TankLeft = false;
+boolean TankRight = false;
+boolean TankLaser = false;
+
+boolean reverseDirection = false;
+
+boolean showScoreboard = true;
+boolean Timer = true;
+
+boolean TankonScreen = true;
+boolean TimeLeft = true;
+boolean AliensatTank = false;
+
+boolean WinScreen = false;
+boolean LoseScreen = false;
+
+
+PImage SpaceShip;
+PImage Invader2;
+PImage Invader3;
+PImage Alien2;
+PImage Alien3;
+PImage StarShooter2;
+PImage StarShooter3;
+PImage Tank;
+
+PImage[][] alienImages = new PImage[2][5];
+
+Boolean[][] alienOnScreen = new Boolean[5][9];
+
+
+float sec = millis() /1000.0; 
+
+void setup() {
+  size(600, 600);
+  frameRate(30);
+
+
+  Invader2 = loadImage("Invader2.jpg");
+  Invader3 = loadImage("Invader3.jpg");
+  Alien2 = loadImage("Alien2.jpg");
+  Alien3 = loadImage("Alien3.jpg");
+  StarShooter2 = loadImage("StarShooter2.jpg");
+  StarShooter3 = loadImage("StarShooter3.jpg");
+  
+  alienImages[0][0] = Invader2;
+  alienImages[1][0] = Invader3;
+  alienImages[0][1] = Invader2;
+  alienImages[1][1] = Invader3;
+  alienImages[0][2] = Alien2;
+  alienImages[1][2] = Alien3;
+  alienImages[0][3] = Alien2;
+  alienImages[1][3] = Alien3;
+  alienImages[0][4] = StarShooter2;
+  alienImages[1][4] = StarShooter3;
+
+  for (int row = 0; row < 5; row++) {
+    for (int col = 0; col < 9; col++) {
+      alienOnScreen[row][col] = true;
+    }
+  }
+}
+
+void draw() {
+
+  background(0);
+    Scoreboard();
+ 
+
+
+
+
+   if(gameState  == 1)  {
+   drawGameState1();
+   } else if ( gameState == 2) {
+   drawGameState2 ();
+   }else if (gameState == 3){
+     drawGameState3();
+       }else if (gameState == 4){
+     drawGameState4();
+   }
+   }
+   
+     
+
+
+void drawGameState1(){
+ background(#000000);
+ textSize(32);
+ text("Welcome to the World of Invaders", 25,26);
+ textSize(12);
+ text(" Your task is to slay those pests as fast as fast as possible and achieve a record breaking score", 20,50);
+ textSize(15);
+ text("press q to begin, ahahah your time has already begun, act quickly", 50,100);
+
+ }
+
+
+ void drawGameState2(){
+TankonScreen = true;
+Timer = true;
+TimeLeft = true;
+AliensatTank = false;
+  DrawingMovingInvaders();
+  Timer();
+  checkboundary();
+  DrawTank();
+  MoveTank();
+  TankBoundary();
+  TankLaser();
+  LaserBoundary();
+
+
+ }
+   
+ 
+
+
+
+void  DrawingMovingInvaders() {
+if(TimeLeft == true){
+  for (int row = 0; row < 5; row++) {
+    for (int col = 0; col < 9; col++) {
+      if (alienOnScreen[row][col] == true) {
+        image(alienImages[millis()/1000%2][row], InvaderXPosition[row][col], AlienYs[row][col], 20, 20);
+        checkAlienHitBox(row,col);
+        InvaderXPosition[row][col] += Shipx;  
+      }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+void checkAlienHitBox (int row, int col) {
+
+  int LaserTop = LaserY;
+  int LaserBottom = LaserY + 10;
+  int LaserLeft = LaserX + 21 ;
+  int LaserRight = LaserX + 24;
+  int AlienTop = AlienYs[row][col] ;
+  int AlienBottom = AlienYs[row][col] + 20;
+  int AlienLeft = InvaderXPosition[row][col];
+  int AlienRight = InvaderXPosition[row][col] + 20;
+  if ( LaserLeft < AlienRight && LaserRight > AlienLeft && LaserTop < AlienBottom && LaserBottom > AlienTop) {
+    alienOnScreen[row][col] = false;
+   
+  }
+}
+
+
+
+
+void checkboundary() {
+  
+  for (int row = 0; row < 5; row++) {
+    for (int col = 0; col < 9; col++) {
+      if (InvaderXPosition[row][col] < 150 || InvaderXPosition[row][col] > 450) {
+        //AlienYs[row][col] += 5;
+        reverseDirection = true;
+      }
+    }
+  }
+  if (reverseDirection) {
+    Shipx *= -1;
+    for (int row = 0; row < 5; row++) {
+      for (int col = 0; col < 9; col++) {
+   AlienYs[row][col] += 15;
+      
+        if(AlienYs[row][col] > 430){
+           TankonScreen = false;
+     alienOnScreen[row][col] = false;
+     
+        }
+      }
+        }
+    
+    }
+    reverseDirection = false;
+  
+  }
+    
+  
+
+
+void Timer() {
+ 
+  if(Timer == true){
+  millis();
+  textSize(25);
+  text(max(0, TimeRemaining - millis()/1000), 280, 50);
+
+  
+}
+      }
+
+ 
+
+void DrawTank() {
+  {
+    if(TankonScreen == true){
+    Tank = loadImage( "Tank.jpg");
+    image(Tank, TankX, TankY, 50, 50);
+  }
+  }
+}
+
+void MoveTank() {
+  if (TankLeft) {
+    TankX -= 5;
+  }
+  if (TankRight) {
+    TankX += 5;
+  }
+}
+
+void  TankBoundary() {
+  if (TankX > 460) {
+    TankX = 455;
+  } else if ( TankX <150) {
+    TankX = 155;
+  }
+}
+
+void TankLaser() {
+  if (TankLaser == true) {
+    rect(LaserX + 21, LaserY - 10, 3, 10);
+    LaserY  -= 10;
+  }
+}
+
+void LaserBoundary() {
+      for (int row = 0; row < 5; row++) {
+    for (int col = 0; col < 9; col++) {
+      int LaserTop = LaserY;
+  int LaserBottom = LaserY + 10;
+  int LaserLeft = LaserX + 21 ;
+  int LaserRight = LaserX + 24;
+  int AlienTop = AlienYs[row][col] ;
+  int AlienBottom = AlienYs[row][col] + 20;
+  int AlienLeft = InvaderXPosition[row][col];
+  int AlienRight = InvaderXPosition[row][col] + 20;
+  if (LaserY < 120) { 
+    TankLaser = false;
+    LaserY = TankY  - 10;
+    LaserX = TankX ;
+  }
+    else if (LaserLeft < AlienRight && LaserRight > AlienLeft && LaserTop < AlienBottom && LaserBottom > AlienTop && alienOnScreen[row][col] == true){
+          alienOnScreen[row][col] = false;
+    TankLaser = false;
+    LaserY = TankY  - 10;
+    LaserX = TankX ;
+    score++; 
+   
+  }
+}
+    }
+}
+void Scoreboard() {
+  if (showScoreboard == true) { 
+    fill(#FFFFFF);
+    text("Score : "+ score, 20, 30, 24);
+   if(score == 45){
+  showScoreboard = false;
+  endgame();
+
+  }
+  
+ if(AliensatTank == true && score <= 44){
+    showScoreboard = false;
+  endgame();
+ }
+}
+}
+
+void endgame(){
+   
+ if(score == 45){
+   Timer = false;
+   TankonScreen = false;
+   gameState = 3;
+   
+ if(AliensatTank == true && score <= 44 ){
+   Timer = false;
+   TankonScreen = false;
+ gameState = 4;
+
+ }
+}
+}
+  void   drawGameState3(){
+
+     text("you win", 280,300);
+     WinScreen = true;
+     text("Press F to return to HomeScreen", 100,500);
+
+  }
+      
+      
+  
+   void drawGameState4(){
+
+       text("you lose", 280,300);
+       LoseScreen = true;
+           
+      
+  }
+   
+  
+void keyPressed() {     
+  if (keyCode == 37) {
+    TankLeft = true;
+  }
+  if (keyCode == 39) {
+    TankRight = true;
+  }
+  if (keyCode == 32) {
+    if(!TankLaser){
+      TankLaser = true;
+      LaserX = TankX;
+    }
+  }
+  if(keyCode == 81){
+    gameState = 2;
+  }
+    if(keyCode == 70 && WinScreen == true && score == 45  ) {
+       TimeRemaining += 50;
+          score = 0;
+          WinScreen = false;
+    gameState = 1;
+    }
+             
+    
+    if(keyCode == 71 && LoseScreen == true  && score <= 44  ) {
+       TimeRemaining += 50;
+          score = 0;
+ LoseScreen = false;
+    gameState = 1;
+    }
+}
+void keyReleased() {
+
+  if (keyCode == 37) {
+    TankLeft = false;
+  }
+  if (keyCode == 39) {
+    TankRight = false;
+  }
+}
